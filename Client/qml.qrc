@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>registerUI.qml</file>
         <file>MainWindowUI.qml</file>
+        <file>icon.png</file>
     </qresource>
 </RCC>

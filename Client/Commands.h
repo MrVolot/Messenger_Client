@@ -1,0 +1,7 @@
+#pragma once
+
+#define CORRECT 0x0000
+#define AUTHRESPONSE 0x0001
+#define LOGINRESPONSE 0x0002
+#define WRONGTOKEN 0x0003
+#define WRONGCREDENTIALS 0x0004

@@ -4,7 +4,7 @@ import QtQuick.Controls
 
 Window {
     title: "Register"
-    visible:true
+    visible:false
     minimumWidth: 300
     minimumHeight: 100
     maximumWidth: 300
@@ -24,6 +24,12 @@ Window {
             password.credentials = false;
             txtPassword.placeholderText = "Wrong credentials!";
             txtPassword.text = "";
+        }
+
+        function onWrongToken(status){
+            if(!status){
+                root.show();
+            }
         }
     }
 

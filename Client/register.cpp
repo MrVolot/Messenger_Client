@@ -1,6 +1,13 @@
 #include "register.h"
 #include "../Json/json/json.h"
 #include <fstream>
+#include <Commands.h>
+
+#include <QSysInfo>
+#include <QStorageInfo>
+#include <QNetworkInterface>
+#include <QSettings>
+#include <QProcess>
 
 Register::Register(io_service& service, QObject *parent)
     : service_{service},
@@ -19,22 +26,22 @@ void Register::readCallback(std::shared_ptr<IConnectionHandler<Register> > handl
     Json::Value value;
     Json::Reader reader;
     reader.parse(data, value);
-    if(value["command"].asString() == "authResponse"){
-        if(value["status"].asString() == "true"){
-            writeHashToFile(value["token"].asString());
-            emit customClose();
-            emit hashStatus(true);
-            return;
-        }
+    if(value["command"].asInt() == LOGINRESPONSE){
+        writeHashToFile(value["token"].asString());
+        emit customClose();
+        emit hashStatus(true);
+        return;
     }
-    if(value["command"].asString() == "loginResponse"){
-        if(value["status"].asString() == "true"){
-            writeHashToFile(value["token"].asString());
-            emit hashStatus(true);
-            return;
-        }
+    if(value["command"].asInt() == AUTHRESPONSE){
+        emit hashStatus(true);
+        return;
     }
-    emit wrongCredentials();
+    if(value["command"].asInt() == WRONGTOKEN){
+        emit wrongToken(false);
+    }
+    if(value["command"].asInt() == WRONGCREDENTIALS){
+        emit wrongCredentials();
+    }
     handler_->callRead();
 }
 
@@ -46,6 +53,9 @@ void Register::writeCallback(std::shared_ptr<IConnectionHandler<Register> > hand
 void Register::init(const boost::system::error_code& erCode)
 {
     handler_->callRead();
+    if(!checkLoginData()){
+        emit wrongToken(false);
+    }
 }
 
 void Register::initializeConnection()
@@ -78,13 +88,14 @@ void Register::loginUser(QString login, QString password, QString command)
     value["command"] = command.toStdString();
     login_ = login.toStdString();
     value["login"] = login_;
+    value["deviceID"] = createDeviceId();
     value["password"] = password.toStdString();
     handler_->callWrite(writer_.write(value));
 }
 
 void Register::writeHashToFile(const std::string &hash)
 {
-    std::fstream tokenFile {"tokenFile.bin"};
+    std::fstream tokenFile;
     Json::Value valueToFile;
     tokenFile.open("tokenFile.bin", std::ios::out);
     valueToFile["login"] = login_;
@@ -92,4 +103,14 @@ void Register::writeHashToFile(const std::string &hash)
     tokenFile << valueToFile;
     tokenFile.close();
     return;
+}
+
+std::string Register::createDeviceId()
+{
+    std::string id{QSysInfo::currentCpuArchitecture().toLocal8Bit().constData()};
+    id.append(QSysInfo::prettyProductName().toLocal8Bit().constData() );
+    id.append(QSysInfo::kernelType().toLocal8Bit().constData());
+    id.append(QSysInfo::kernelVersion().toLocal8Bit().constData());
+    id.append(QSysInfo::machineHostName().toLocal8Bit().constData());
+    return id;
 }

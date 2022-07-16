@@ -28,6 +28,9 @@ set(PROJECT_SOURCES
         windowmanager.cpp
         ioserviceworker.cpp
         ioserviceworker.h
+        mainwindow.h
+        mainwindow.cpp
+        commands.h
 )
 
 set(BOOST_LIBRARYDIR D:/Boost/boost-build/lib)
