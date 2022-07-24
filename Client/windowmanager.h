@@ -12,17 +12,23 @@
 class windowManager: public QObject
 {
     Q_OBJECT
-    std::shared_ptr<Register> registerWindow;
-    std::shared_ptr<MainWindow> mainWindow;
+    std::shared_ptr<Register> register_;
+    std::shared_ptr<MainWindow> main_;
     std::unique_ptr<QGuiApplication> app;
     std::unique_ptr<QQmlApplicationEngine> engine;
 
-    int startRegisterWindow();
-    int startMainWindow();
+    void startRegistration();
     void start(boost::asio::io_service& service);
+    bool checkRegisterState();
+    void asyncLogin(const QString& login, const QString& password);
+    void asyncRegister(const QString& login, const QString& password);
 public:
     windowManager(boost::asio::io_service& service);
-private slots:
-    void hashStatus(bool status);
-    void onSessionClose();
+public slots:
+    Q_INVOKABLE void loginUser(const QString& login, const QString& password);
+    Q_INVOKABLE void registerUser(const QString& login, const QString& password);
+signals:
+    void loginSuccess();
+    void wrongCredentials();
+    void userExists();
 };

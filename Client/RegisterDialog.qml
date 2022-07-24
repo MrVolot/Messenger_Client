@@ -2,34 +2,30 @@ import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQuick.Controls
 
-Window {
-    title: "Register"
-    visible:false
-    minimumWidth: 300
-    minimumHeight: 100
-    maximumWidth: 300
-    maximumHeight: 100
-    id: root
-
+Rectangle{
+    id: registrationDialog
+    width: 300
+    height: 100
+    color: "red"
+    //anchors.centerIn: parent
+    property bool showText: false
     Connections{
-        target: registerWindow
-        ignoreUnknownSignals: true
-        function onCustomClose(){
-            root.close();
-        }
-
+        target: mainWindowClass
         function onWrongCredentials(){
-            console.log("onCWrongCredentials()");
             login.credentials = false;
             password.credentials = false;
             txtPassword.placeholderText = "Wrong credentials!";
             txtPassword.text = "";
+            mainWindow.loading = false;
+            registrationDialog.opacity = 1.0;
         }
-
-        function onWrongToken(status){
-            if(!status){
-                root.show();
-            }
+        function onUserExists(){
+            login.credentials = false;
+            password.credentials = false;
+            txtPassword.placeholderText = "User already exists!";
+            txtPassword.text = "";
+            mainWindow.loading = false;
+            registrationDialog.opacity = 1.0;
         }
     }
 
@@ -49,6 +45,7 @@ Window {
                 anchors.fill: parent
                 anchors.margins: 0
                 anchors.centerIn: parent
+                selectByMouse: true
                 placeholderText: "Login"
                 background:Rectangle{border.width: 1
                     color: login.credentials ? "white" : "#F29688"}
@@ -66,9 +63,29 @@ Window {
                 id: txtPassword
                 anchors.fill: parent
                 anchors.margins: 0
-                placeholderText: "Register"
+                selectByMouse: true
+                placeholderText: "Password"
+                echoMode: showText ? TextField.Normal : TextField.Password
                 background:Rectangle{border.width: 1
                     color: password.credentials ? "white" : "#F29688"}
+            }
+            Image{
+                source: "index.svg"
+                sourceSize.width: 30
+                sourceSize.height: parent.height
+                anchors.right: parent.right
+                MouseArea {
+                    anchors.fill: parent;
+                    onClicked:{
+                        if(showText){
+                            showText = false
+                        }
+                        else
+                        {
+                            showText = true
+                        }
+                    }
+                }
             }
         }
         Row{
@@ -79,7 +96,9 @@ Window {
                 height:25
                 onClicked: {
                     if(txtLogin.text!=="" && txtPassword.text!==""){
-                        registerWindow.loginUser(txtLogin.text, txtPassword.text, "login");
+                        mainWindowClass.loginUser(txtLogin.text, txtPassword.text);
+                        registrationDialog.opacity = 0.3;
+                        mainWindow.loading = true;
                     }
                 }
             }
@@ -90,11 +109,12 @@ Window {
                 height:25
                 onClicked: {
                     if(txtLogin.text!=="" && txtPassword.text!==""){
-                        registerWindow.loginUser(txtLogin.text, txtPassword.text, "register");
+                        mainWindowClass.registerUser(txtLogin.text, txtPassword.text);
+                        registrationDialog.opacity = 0.3;
+                        mainWindow.loading = true;
                     }
                 }
             }
         }
     }
-
 }

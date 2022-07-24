@@ -7,7 +7,7 @@ MainWindow::MainWindow(boost::asio::io_service &service, QObject *parent):
     port_{10678}
 {
     handler_.reset(new ConnectionHandler<MainWindow>{ service_, *this});
-    handler_->setReadCallback(&MainWindow::readCallback);
+    handler_->setAsyncReadCallback(&MainWindow::readCallback);
     handler_->setWriteCallback(&MainWindow::writeCallback);
 }
 
@@ -33,7 +33,6 @@ void MainWindow::init(const boost::system::error_code &erCode)
 
 void MainWindow::startClose()
 {
-    std::remove("tokenFile.bin");
     emit customClose();
     emit restartSession();
 }
