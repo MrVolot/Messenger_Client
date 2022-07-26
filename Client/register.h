@@ -14,9 +14,10 @@ class Register : public QObject,  public std::enable_shared_from_this<Register>
     short port_;
     boost::asio::io_service& service_;
     std::shared_ptr<IConnectionHandler<Register>> handler_;
-    std::mutex mtx;
-    std::condition_variable cv;
-    std::string serverResponseString;
+    std::mutex mtx_;
+    std::condition_variable cv_;
+    std::string serverResponseString_;
+    std::string hash_;
 
     void writeCallback(std::shared_ptr<IConnectionHandler<Register>> handler, const boost::system::error_code &err, size_t bytes_transferred);
     void readCallback(std::shared_ptr<IConnectionHandler<Register>> handler, const boost::system::error_code &err, size_t bytes_transferred);
@@ -29,4 +30,5 @@ public:
     unsigned int loginUser(const QString& login, const QString& password, const QString& command);
     unsigned int checkLoginData();
     void initializeConnection();
+    std::string getHash();
 };

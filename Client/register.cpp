@@ -32,9 +32,9 @@ void Register::writeCallback(std::shared_ptr<IConnectionHandler<Register> > hand
 
 void Register::readCallback(std::shared_ptr<IConnectionHandler<Register> > handler, const boost::system::error_code &err, size_t bytes_transferred)
 {
-    serverResponseString.erase();
-    serverResponseString = boost::asio::buffer_cast<const char*>(handler->getStrBuf()->data());
-    cv.notify_all();
+    serverResponseString_.erase();
+    serverResponseString_ = boost::asio::buffer_cast<const char*>(handler->getStrBuf()->data());
+    cv_.notify_all();
 }
 
 void Register::init(const boost::system::error_code& erCode)
@@ -49,11 +49,19 @@ void Register::initializeConnection()
     handler_->getSocket().async_connect(boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(ip_), port_),std::bind(&Register::init,shared_from_this(),std::placeholders::_1));
 }
 
+std::string Register::getHash()
+{
+    return hash_;
+}
+
 unsigned int Register::checkServerResponse()
 {
     Json::Value value;
     Json::Reader reader;
-    reader.parse(serverResponseString, value);
+    reader.parse(serverResponseString_, value);
+    if(!value["token"].empty()){
+        hash_ = value["token"].asString();
+    }
     return value["command"].asInt();
 }
 
@@ -65,8 +73,8 @@ unsigned int Register::checkLoginData()
     value["deviceId"] = createDeviceId();
     handler_->callWrite(writer.write(value));
     handler_->callAsyncRead();
-    std::unique_lock<std::mutex> locker{mtx};
-    cv.wait(locker);
+    std::unique_lock<std::mutex> locker{mtx_};
+    cv_.wait(locker);
     return checkServerResponse();
 }
 
@@ -80,8 +88,8 @@ unsigned int Register::loginUser(const QString& login, const QString& password, 
     value["password"] = password.toStdString();
     handler_->callWrite(writer_.write(value));
     handler_->callAsyncRead();
-    std::unique_lock<std::mutex> locker{mtx};
-    cv.wait(locker);
+    std::unique_lock<std::mutex> locker{mtx_};
+    cv_.wait(locker);
     return checkServerResponse();
 }
 

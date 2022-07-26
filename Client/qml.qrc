@@ -1,11 +1,12 @@
 <RCC>
     <qresource prefix="/">
-        <file>tmp.qml</file>
         <file>icon.png</file>
         <file>MainWindow.qml</file>
         <file>RegisterDialog.qml</file>
         <file>loading.gif</file>
         <file>index.svg</file>
         <file>MessengerDialog.qml</file>
+        <file>profile.png</file>
+        <file>logout.png</file>
     </qresource>
 </RCC>

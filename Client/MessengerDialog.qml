@@ -21,12 +21,49 @@ Rectangle
         modal: true
         focus: true
         anchors.centerIn: parent
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-        Button{
-            id: logout
-            text: "Logout"
-            onClicked: {
-                mainWindow.logout();
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        ColumnLayout{
+            Text{
+                text:"Settings"
+            }
+
+            RowLayout{
+                Image{
+                    source: "profile.png"
+                    sourceSize.width: 30
+                    sourceSize.height: 30
+                }
+                Text{
+                    text:"UserName"
+                }
+            }
+        }
+        Rectangle{
+            width: parent.width
+            height: 23
+            anchors.bottom: parent.bottom
+            color:"#f08080"
+            border.color:"red"
+            Row{
+                anchors.centerIn: parent
+                Image{
+                    source: "logout.png"
+                    sourceSize.width: 17
+                    sourceSize.height: 17
+
+                }
+                Text{
+                    text: "Logout"
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent;
+
+                onClicked:{
+                    popup.destroy();
+                    mainWindow.onLogout();
+                }
             }
         }
     }

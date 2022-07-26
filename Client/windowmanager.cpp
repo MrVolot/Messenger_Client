@@ -2,27 +2,27 @@
 #include <ioserviceworker.h>
 #include <Commands.h>
 
-
-windowManager::windowManager(boost::asio::io_service& service)
+windowManager::windowManager(boost::asio::io_service& service): service_{service}
 {
     int arg{0};
-    app.reset(new QGuiApplication{arg, nullptr});
-    start(service);
+    app_.reset(new QGuiApplication{arg, nullptr});
+    start();
 
 }
 
-void windowManager::start(boost::asio::io_service& service)
+void windowManager::start()
 {
-    register_.reset(new Register{service});
+    register_.reset(new Register{service_});
     register_->initializeConnection();
-    //auto status{checkRegisterState()}; //true when login was successful
-    engine.reset(new QQmlApplicationEngine{});
-    engine->rootContext()->setContextProperty("mainWindowClass", this);
-    engine->load(QStringLiteral("qrc:/MainWindow.qml"));
-    //    if(status){
-    //        emit loginSuccess();
-    //    }
-    app->exec();
+    auto status{checkRegisterState()}; //true when login was successful
+    engine_.reset(new QQmlApplicationEngine{});
+    engine_->rootContext()->setContextProperty("mainWindowClass", this);
+    engine_->load(QStringLiteral("qrc:/MainWindow.qml"));
+    if(status){
+        emit loginSuccess();
+        createMessengerInstance();
+    }
+    app_->exec();
 }
 
 bool windowManager::checkRegisterState()
@@ -47,6 +47,7 @@ void windowManager::asyncLogin(const QString &login, const QString &password)
             return;
         case RIGHTCREDENTIALS:
             emit loginSuccess();
+            createMessengerInstance();
             return;
         }
     }
@@ -62,10 +63,19 @@ void windowManager::asyncRegister(const QString &login, const QString &password)
             return;
         case RIGHTCREDENTIALS:
             emit loginSuccess();
+            createMessengerInstance();
             return;
             ;
         }
     }
+}
+
+void windowManager::createMessengerInstance()
+{
+    auto hash{register_->getHash()};
+    register_.reset();
+    messenger_.reset(new Messenger{service_, hash});
+    messenger_->initializeConnection();
 }
 
 void windowManager::loginUser(const QString &login, const QString &password)

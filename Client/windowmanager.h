@@ -7,21 +7,23 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQmlEngine>
-#include <mainwindow.h>
+#include <messenger.h>
 
 class windowManager: public QObject
 {
     Q_OBJECT
     std::shared_ptr<Register> register_;
-    std::shared_ptr<MainWindow> main_;
-    std::unique_ptr<QGuiApplication> app;
-    std::unique_ptr<QQmlApplicationEngine> engine;
+    std::shared_ptr<Messenger> messenger_;
+    std::unique_ptr<QGuiApplication> app_;
+    std::unique_ptr<QQmlApplicationEngine> engine_;
+    boost::asio::io_service& service_;
 
     void startRegistration();
-    void start(boost::asio::io_service& service);
+    void start();
     bool checkRegisterState();
     void asyncLogin(const QString& login, const QString& password);
     void asyncRegister(const QString& login, const QString& password);
+    void createMessengerInstance();
 public:
     windowManager(boost::asio::io_service& service);
 public slots:

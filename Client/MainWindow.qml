@@ -10,10 +10,12 @@ ApplicationWindow {
     minimumHeight: 600
     property bool register: true
     property bool loading: false
+    function onLogout(){
+        stack.push(registerWindow);
+    }
     Connections{
         target: mainWindowClass
         function onLoginSuccess(){
-            console.log("success");
             register = false;
             loading = false;
             stack.push(messengerWindow);

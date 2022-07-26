@@ -28,9 +28,11 @@ set(PROJECT_SOURCES
         windowmanager.cpp
         ioserviceworker.cpp
         ioserviceworker.h
-        mainwindow.h
-        mainwindow.cpp
         commands.h
+        contact.h
+        contact.cpp
+        messenger.h
+        messenger.cpp
 )
 
 set(BOOST_LIBRARYDIR D:/Boost/boost-build/lib)
