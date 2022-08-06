@@ -12,7 +12,12 @@ ApplicationWindow {
     property bool loading: false
     function onLogout(){
         stack.push(registerWindow);
+        mainWindowClass.logout();
     }
+    function sendMessage(receiver, message){
+        mainWindowClass.sendMessage(receiver, message);
+    }
+
     Connections{
         target: mainWindowClass
         function onLoginSuccess(){
@@ -20,6 +25,7 @@ ApplicationWindow {
             loading = false;
             stack.push(messengerWindow);
         }
+
     }
     StackView {
         id: stack
@@ -44,8 +50,6 @@ ApplicationWindow {
     }
     Component {
         id: registerWindow
-
-
         RegisterDialog{
                 anchors.centerIn: parent
         }
@@ -66,5 +70,8 @@ ApplicationWindow {
             centerIn: parent
         }
         speed: 1
+    }
+    onClosing:{
+        mainWindowClass.closeWindow();
     }
 }

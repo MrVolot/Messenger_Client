@@ -8,5 +8,7 @@
         <file>MessengerDialog.qml</file>
         <file>profile.png</file>
         <file>logout.png</file>
+        <file>Message.qml</file>
+        <file>MyRect.qml</file>
     </qresource>
 </RCC>

@@ -5,13 +5,19 @@ import QtQuick.Layouts 1.12
 
 Rectangle
 {
+    property int contactId: -1
+    property string contactName: ""
+
+
+
     Connections{
-        target: mainWindow
+        target: mainWindowClass
         ignoreUnknownSignals: true
-        function onCustomClose(){
-            root.close();
+        function onUpdateChat(sender, messageArg){
+            myModel.append({msg:messageArg, sndr: sender, col:"green"})
         }
     }
+
     Popup {
         id: popup
         x: 100
@@ -70,13 +76,17 @@ Rectangle
     ListModel {
         id: listModel
 
-        ListElement {
-            mytext: "Kyrylo"
-        }
+
         ListElement {
             mytext: "Vadym"
         }
+        ListElement {
+            mytext: "Kyrylo"
+        }
     }
+
+
+
     SplitView {
         anchors.fill: parent
         orientation: Qt.Horizontal
@@ -94,12 +104,12 @@ Rectangle
                 model: listModel
                 spacing: 3
                 delegate: Component {
-                    id: listDelegate
 
                     Item {
                         width: parent.width;
                         height: 20
                         Rectangle{
+
                             width: parent.width;
                             height: 20
                             color:"lightgrey"
@@ -108,8 +118,9 @@ Rectangle
                                 anchors.fill: parent;
 
                                 onClicked:{
-                                    console.debug("clicked:"+ index);
-                                    contactNameInChat.text = mytext
+                                    contactId = index;
+                                    contactNameInChat.text = mytext;
+                                    contactName = contactNameInChat.text;
                                 }
                             }
                         }
@@ -125,6 +136,30 @@ Rectangle
                 }
             }
         }
+
+
+
+
+        ListModel {
+            id:  myModel;
+        }
+
+        Component
+        {
+            id: myRectComp;
+
+            MyRect
+            {
+                color: col;
+                message: msg;
+                sender: sndr;
+            }
+        }
+
+
+
+
+
         ColumnLayout {
             id: centerItem
             SplitView.fillWidth: true
@@ -147,14 +182,49 @@ Rectangle
                 }
             }
 
-            Label {
-                text: "View 2"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            ListView {
+                id: listView
+                model: myModel;
+                delegate: myRectComp;
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                background: Rectangle {
-                    color: "Grey"
-                }
+                spacing: 100
+                readonly property bool sentByMe: index % 2 == 0
+
+                anchors.right: sentByMe ? listView.contentItem.right : undefined
             }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             RowLayout{
                 id: row
                 width: parent.width
@@ -175,7 +245,8 @@ Rectangle
                     MouseArea {
                         anchors.fill: parent;
                         onClicked:{
-                            console.debug("Send message " + txtMessage.text);
+                            mainWindow.sendMessage(contactName, txtMessage.text);
+                            myModel.append({msg:txtMessage.text, sndr: "sender", col:"lightgrey"})
                         }
                     }
                 }

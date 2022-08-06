@@ -14,14 +14,14 @@ void windowManager::start()
 {
     register_.reset(new Register{service_});
     register_->initializeConnection();
-    auto status{checkRegisterState()}; //true when login was successful
+    //auto status{checkRegisterState()}; //true when login was successful
     engine_.reset(new QQmlApplicationEngine{});
     engine_->rootContext()->setContextProperty("mainWindowClass", this);
     engine_->load(QStringLiteral("qrc:/MainWindow.qml"));
-    if(status){
-        emit loginSuccess();
-        createMessengerInstance();
-    }
+//    if(status){
+//        emit loginSuccess();
+//        createMessengerInstance();
+//    }
     app_->exec();
 }
 
@@ -74,8 +74,15 @@ void windowManager::createMessengerInstance()
 {
     auto hash{register_->getHash()};
     register_.reset();
-    messenger_.reset(new Messenger{service_, hash});
+    messenger_.reset(new Messenger<windowManager>{service_, hash, this});
+    messenger_->setReceiveMessageCallback(&windowManager::receiveMessage);
     messenger_->initializeConnection();
+}
+
+void windowManager::receiveMessage(const std::string &sender, const std::string &message)
+{
+    qDebug()<<sender.c_str()<<message.c_str();
+    emit updateChat(sender.c_str(), message.c_str());
 }
 
 void windowManager::loginUser(const QString &login, const QString &password)
@@ -88,4 +95,22 @@ void windowManager::registerUser(const QString &login, const QString &password)
 {
     std::thread trd{&windowManager::asyncRegister, this, login, password};
     trd.detach();
+}
+
+void windowManager::logout()
+{
+    messenger_->logout();
+    messenger_.reset();
+    register_.reset(new Register{service_});
+    register_->initializeConnection();
+}
+
+void windowManager::sendMessage(const QString &receiver, const QString &message)
+{
+    messenger_->sendMessage(receiver.toStdString(), message.toStdString());
+}
+
+void windowManager::closeWindow()
+{
+    service_.stop();
 }
